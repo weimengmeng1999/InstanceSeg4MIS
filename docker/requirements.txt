@@ -1,0 +1,7 @@
+scikit-image
+# omegaconf
+# torchmetrics
+# timm
+# einops
+# albumentations
+# opencv-python

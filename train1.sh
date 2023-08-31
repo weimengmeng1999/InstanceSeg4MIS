@@ -1,0 +1,1 @@
+ROBOMIS_DIR=.../data/robo python src/train_unet.py
