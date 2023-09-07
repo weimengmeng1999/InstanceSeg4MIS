@@ -1,4 +1,7 @@
 scikit-image
+albumentations
+omegaconf
+torchmetrics
 # omegaconf
 # torchmetrics
 # timm
