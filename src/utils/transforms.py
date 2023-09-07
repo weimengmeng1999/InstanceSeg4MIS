@@ -11,6 +11,9 @@ from PIL import Image
 from torchvision.transforms import functional as F
 from torchvision.transforms import transforms as T
 
+import albumentations as A
+import cv2
+
 import torch
 
 
@@ -156,6 +159,54 @@ class ToTensor(object):
 
         return sample
 
+class transvit:
+    def __init__(self, keys=[],object_key="instance"):
+        self.keys = keys
+        self.object_key = object_key
+        self.transforms = A.Compose([
+                A.OneOf([
+                    A.RandomSizedCrop(min_max_height=(int(
+                        588 * 0.5), 588),
+                                      height=588,
+                                      width=588,
+                                      p=0.5),
+                A.PadIfNeeded(min_height=588, min_width=588, 
+                              border_mode=cv2.BORDER_CONSTANT)
+                ],p=1),
+                A.HorizontalFlip(p=0.5),
+                A.RandomRotate90(p=0.5),
+                A.OneOf([
+                    A.ElasticTransform(alpha=120,
+                                       sigma=120 * 0.05,
+                                       alpha_affine=120 * 0.03,
+                                       p=0.5),
+                    A.GridDistortion(p=0.5),
+                    A.OpticalDistortion(distort_limit=2, shift_limit=0.5, p=1)
+                ], p=0),
+                        #p=0.8 if self.use_vis_aug_non_rigid else 0),
+                A.CLAHE(p=0.8),
+                A.RandomBrightnessContrast(p=0.8),
+                A.RandomGamma(p=0.8),
+            ],
+            additional_targets={'image': 'image', 'mask0': 'mask', 'mask1': 'mask'})
+
+    def __call__(self, sample):
+        transed = self.transforms(image=np.array(sample['image']).astype(np.uint8), 
+                                  mask0=np.array(sample['label']).astype(np.uint8),
+                                  mask1=np.array(sample['instance']).astype(np.uint8)
+                                  )
+
+        for k in self.keys:
+            assert(k in sample)
+            if k == 'image':
+                sample[k] = transed['image']
+            elif k == 'label':
+                sample[k] = transed['mask0']
+            elif k == 'instance':
+                sample[k] = transed['mask1']
+
+        return sample
+
 
 def get_transform(transforms):
     transform_list = []
@@ -166,3 +217,4 @@ def get_transform(transforms):
         transform_list.append(globals()[name](**opts))
 
     return T.Compose(transform_list)
+
