@@ -35,12 +35,12 @@ args = dict(
                         'size': (588, 588)
                     }
                 },
-                # {
-                #     'name': 'transvit',
-                #     'opts': {
-                #         'keys': ('image', 'instance','label')
-                #     }
-                # },
+                {
+                    'name': 'transvit',
+                    'opts': {
+                        'keys': ('image', 'instance','label')
+                    }
+                },
                 {
                     'name': 'ToTensor',
                     'opts': {
